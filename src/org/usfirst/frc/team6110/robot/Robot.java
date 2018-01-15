@@ -5,15 +5,17 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 /**
- * NIgel v0 (starting from scratch)
+ * NIgel v0.1 (starting from scratch)
  **/
 package org.usfirst.frc.team6110.robot;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.RobotDrive;
+import.edu.wpi.first.wpilibj.SpeedControllerGroup; //	JB
+//import edu.wpi.first.wpilibj.RobotDrive;	//	JB
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;	//	JB
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -25,31 +27,47 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * project.
  */
 public class Robot extends IterativeRobot {
+	/*
 	private static final String kDefaultAuto = "Default";
 	private static final String kCustomAuto = "My Auto";
 	private String m_autoSelected;
 	private SendableChooser<String> m_chooser = new SendableChooser<>();
+	*/
 	
 	//Declaring joysticks and motor controls
-	 Joystick control = new Joystick(1);
-	 Talon rCannon = new Talon(4);
-	 Talon lCannon = new Talon(5);
-	 Talon rArm = new Talon (6);
-	 Talon lArm = new Talon (7);
-	 Talon rPull = new Talon (8);
-	 Talon lPull = new Talon(9);
+	Joystick control = new Joystick(0); // 1 --> 0 JB
+	Talon rCannon = new Talon(5); // All of them were moved up one number	JB
+	Talon lCannon = new Talon(6);
+	Talon rArm = new Talon (7);
+	Talon lArm = new Talon (8);
+	Talon rPull = new Talon (9);
+	Talon lPull = new Talon(10);
 	 
-	 RobotDrive NIgel = new RobotDrive(0,1,2,3); //Declaring NIgle and the motor's used for it
-	 
+	//RobotDrive NIgel = new RobotDrive(0,1,2,3); //Declaring NIgle and the motor's used for it
+	//Setting up 4 Motor drivetrain variables:	//	JB
+	Talon m_frontLeft = new Talon(1); //	JB
+	Talon m_rearLeft = new Talon(2); //	JB
+	SpeedControllerGroup m_Left = new SpeedControllerGroup(m_frontLeft, m_rearLeft); //	JB
+	
+	Talon m_frontRight = new Talon(3); //	JB
+	Talon m_rearRight = new Talon(4); //	JB
+	SpeedControllerGroup m_Right = new SpeedControllerGroup(m_frontLeft, m_rearLeft); //	JB
+	
+	DifferentialDrive NIgel = new DifferentialDrive(m_Left, m_Right); //	JB
+	
+	//Variables
+	boolean teleop; //	JB
+	
 	 /**
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
 	 */
 	@Override
 	public void robotInit() {
-		m_chooser.addDefault("Default Auto", kDefaultAuto);
-		m_chooser.addObject("My Auto", kCustomAuto);
-		SmartDashboard.putData("Auto choices", m_chooser);
+		//m_chooser.addDefault("Default Auto", kDefaultAuto); //	JB
+		//m_chooser.addObject("My Auto", kCustomAuto); //	JB
+		//SmartDashboard.putData("Auto choices", m_chooser); //	     JB
+		teleop = false; //	Autonomous will always begin first so this is set to false JB
 	}
 
 	/**
@@ -63,6 +81,8 @@ public class Robot extends IterativeRobot {
 	 * the switch structure below with additional strings. If using the
 	 * SendableChooser make sure to add them to the chooser code above as well.
 	 */
+	
+	/*
 	@Override
 	public void autonomousInit() {
 		m_autoSelected = m_chooser.getSelected();
@@ -70,10 +90,12 @@ public class Robot extends IterativeRobot {
 		// defaultAuto);
 		System.out.println("Auto selected: " + m_autoSelected);
 	}
-
+	*/
+	
 	/**
 	 * This function is called periodically during autonomous.
 	 */
+	/*
 	@Override
 	public void autonomousPeriodic() {
 		switch (m_autoSelected) {
@@ -86,16 +108,36 @@ public class Robot extends IterativeRobot {
 				break;
 		}
 	}
-
+	*/
+	
+	//The teleopInit method is called once each time the robot enters teleop mode
+	@Override
+	public void teleopInit() {
+		
+		//Check if this function is called so that the next function will be enabled
+		teleop = true;
+	}
+	
 	/**
 	 * This function is called periodically during operator control.
 	 */
+	
 	@Override
 	public void teleopPeriodic() {
-		while(isEnabled() && isOperatorControl()) { //while being used
+		while(teleop == true /*isEnabled() && isOperatorControl()*/) { //while being used
+			//I greyed out isEnabled and isOperatorControl since
+			//we cannot simulate the server sending us these functions.
+			//That maybe the reason why the robot did not run at all LOL
 			
-			NIgel.tankDrive(control.getRawAxis(2),control.getRawAxis(5)); //Drives NIgel using two analogs on xbox controller
-			Timer.delay(0.001); //note: tankDrive is deprecated, this means it will still work but might not in the future
+			//NIgel.tankDrive(control.getRawAxis(2),control.getRawAxis(5)); //Drives NIgel using two analogs on xbox controller
+			//Timer.delay(0.001); //note: tankDrive is deprecated, this means it will still work but might not in the future
+			
+			//Setting up Joy stick Axes for Tank Drive (much cleaner to set variables)	JB
+			double js_Left = joystick.getRawAxis(1); //	Left Joystick	JB
+			double js_Right = joystick.getRawAxis(5); //	Right Joystick	JB
+		
+			NIgel.tankDrive(js_Left, js_Right); //	Tank Drive	JB
+			Timer.delay(0.01); //	JB
 			
 			if(control.getRawButton(5)) { //if button pressed, the launch cube, need to change to rTrigger
 			lCannon.set(-1);
@@ -127,7 +169,10 @@ public class Robot extends IterativeRobot {
 	/**
 	 * This function is called periodically during test mode.
 	 */
+	
+	/*
 	@Override
 	public void testPeriodic() {
 	}
+	*/
 }
