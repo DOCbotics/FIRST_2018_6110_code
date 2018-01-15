@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * creating this project, you must also update the build.properties file in the
  * project.
  */
+
 public class Robot extends IterativeRobot {
 	/*
 	private static final String kDefaultAuto = "Default";
@@ -35,7 +36,7 @@ public class Robot extends IterativeRobot {
 	*/
 	
 	//Declaring joysticks and motor controls
-	Joystick control = new Joystick(0); // 1 --> 0 JB
+	Joystick joystick = new Joystick(0); // 1 --> 0 JB
 	Talon rCannon = new Talon(5); // All of them were moved up one number	JB
 	Talon lCannon = new Talon(6);
 	Talon rArm = new Talon (7);
@@ -44,6 +45,7 @@ public class Robot extends IterativeRobot {
 	Talon lPull = new Talon(10);
 	 
 	//RobotDrive NIgel = new RobotDrive(0,1,2,3); //Declaring NIgle and the motor's used for it
+	
 	//Setting up 4 Motor drivetrain variables:	//	JB
 	Talon m_frontLeft = new Talon(1); //	JB
 	Talon m_rearLeft = new Talon(2); //	JB
