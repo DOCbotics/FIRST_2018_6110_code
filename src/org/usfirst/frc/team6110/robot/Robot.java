@@ -35,7 +35,8 @@ import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.Talon;
 
 import edu.wpi.first.wpilibj.Timer;
-
+import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;	//	JB
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -64,7 +65,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobot {
 
-	/*
+	
 
 	private static final String kDefaultAuto = "Default";
 
@@ -74,7 +75,6 @@ public class Robot extends IterativeRobot {
 
 	private SendableChooser<String> m_chooser = new SendableChooser<>();
 
-	*/
 
 	
 
@@ -86,47 +86,33 @@ public class Robot extends IterativeRobot {
 	 */
 
 	Joystick joystick = new Joystick(0); // 1 --> 0 JB
-
-	/*WPI_TalonSRX rCannon = new WPI_TalonSRX(5);
-
-	WPI_TalonSRX lCannon = new WPI_TalonSRX(6);
-
-	WPI_TalonSRX rArm = new WPI_TalonSRX (7);
-
-	WPI_TalonSRX lArm = new WPI_TalonSRX (8);
-
-	WPI_TalonSRX rPull = new WPI_TalonSRX (9);
-
-	WPI_TalonSRX lPull = new WPI_TalonSRX(10);
-	*/
-
-	 
-
-	//RobotDrive NIgel = new RobotDrive(0,1,2,3); //Declaring NIgle and the motor's used for it
-
 	
 
 	//Setting up 4 Motor drivetrain variables:	//	JB
-
-	WPI_TalonSRX m_0 = new WPI_TalonSRX(0); //	port 12
+	VictorSP m_0 = new VictorSP(0);
 
 	WPI_TalonSRX m_1 = new WPI_TalonSRX(1); //	port 0
-
-//	SpeedControllerGroup m_Left = new SpeedControllerGroup(m_0, m_1); //	JB
-	
 	
 	WPI_TalonSRX m_2 = new WPI_TalonSRX(2); //	JB
 
 	WPI_TalonSRX m_3 = new WPI_TalonSRX(3); //	JB
 	
-
-//	SpeedControllerGroup m_Right = new SpeedControllerGroup(m_2, m_3); //	JB
-
-//	DifferentialDrive NIgel = new DifferentialDrive(m_Left, m_Right); //	JB
-
-
+	/*
+	WPI_TalonSRX m_4 = new WPI_TalonSRX(4);
+	
+	WPI_TalonSRX m_5 = new WPI_TalonSRX(5);
+	
+	WPI_TalonSRX m_6 = new WPI_TalonSRX(6);
+	
+	WPI_TalonSRX m_7 = new WPI_TalonSRX(7);
+	
+	WPI_TalonSRX m_8 = new WPI_TalonSRX(8);
+	
+	WPI_TalonSRX m_9 = new WPI_TalonSRX(9);
+	*/
 	//Variables
-
+	
+	double launch = 0.5;
 	boolean teleop; //	JB
 
 	
@@ -143,11 +129,11 @@ public class Robot extends IterativeRobot {
 
 	public void robotInit() {
 
-		//m_chooser.addDefault("Default Auto", kDefaultAuto); //	JB
+		m_chooser.addDefault("Default Auto", kDefaultAuto); //	JB
 
-		//m_chooser.addObject("My Auto", kCustomAuto); //	JB
+		m_chooser.addObject("My Auto", kCustomAuto); //	JB
 
-		//SmartDashboard.putData("Auto choices", m_chooser); //	     JB
+		SmartDashboard.putData("Auto choices", m_chooser); //	     JB
 
 		teleop = false; //	Autonomous will always begin first so this is set to false JB
 
@@ -179,7 +165,7 @@ public class Robot extends IterativeRobot {
 
 	
 
-	/*
+	
 
 	@Override
 
@@ -195,7 +181,6 @@ public class Robot extends IterativeRobot {
 
 	}
 
-	*/
 
 	
 
@@ -205,7 +190,7 @@ public class Robot extends IterativeRobot {
 
 	 */
 
-	/*
+	
 
 	@Override
 
@@ -231,7 +216,7 @@ public class Robot extends IterativeRobot {
 
 	}
 
-	*/
+
 
 	
 
@@ -293,8 +278,8 @@ public class Robot extends IterativeRobot {
 			}
 
 			
-			leftdrive(joystick.getRawAxis(1));
-			rightdrive(joystick.getRawAxis(5));
+			leftdrive(js_Left);
+			rightdrive(js_Right);
 			
 			
 			
@@ -303,57 +288,29 @@ public class Robot extends IterativeRobot {
 
 			Timer.delay(0.01); //	JB
 
-			
-
-			/*if(joystick.getRawButton(5)) { //if button pressed, the launch cube, need to change to rTrigger
-
-			lCannon.set(-1);
-
-			rCannon.set(-1);
-
+			if(joystick.getRawAxis(3) > 0.75) {
+				//m_4.set(0.5);
+				//m_5.set(0.5);
 			}
-
-			else if(joystick.getRawAxis(3) >= 0.75) { //if rTrigger pressed -KL
-
-				rArm.set(-.25);
-
-				lArm.set(-.25);
-
+			else if(joystick.getRawAxis(2) > 0.75) {
+				//m_6.set(-0.5);
+				//m_7.set(-0.5);
 			}
-
-			else if(joystick.getRawButton(6)) { //if button pressed, close arms
-
-				rArm.set(.25);
-
-				lArm.set(.25);
-
+			else if(joystick.getRawButton(6)) {
+				//m_8.set(launch);
+				//m_9.set(launch);
 			}
-
-			else if(joystick.getRawButton(7) ) { //activates wheels to pull cube in
-
-				rPull.set(.33);
-
-				lPull.set(.33);
-
+			else {
+				/*
+				 * m_4.set(0);
+				 * m_5.set(0);
+				 * m_6.set(0);
+				 * m_7.set(0);
+				 * m_8.set(0);
+				 * m_9.set(0);
+				 * 
+				 */
 			}
-
-			else { //motors will continuously run once activated if this else statement isn't here
-
-				lCannon.set(0);
-
-				rCannon.set(0);
-
-				rArm.set(0);
-
-				lArm.set(0);
-
-				rPull.set(0);
-
-				lPull.set(0);
-				
-
-			}
-			*/
 			
 
 		}
@@ -381,14 +338,16 @@ public class Robot extends IterativeRobot {
 	*/
 	
 	public void leftdrive(double d) {
+	
 		m_0.set(-d);
 		m_1.set(-d);
+		
 	}
 	
 	public void rightdrive(double d) {
 		m_2.set(-d);
 		m_3.set(-d);
+		
 	}
 
 }
-
