@@ -42,6 +42,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+//http://first.wpi.edu/FRC/roborio/beta/docs/java/edu/wpi/first/wpilibj/drive/DifferentialDrive.html
+//^ Differential drive documentation
 
 
 /**
@@ -85,7 +87,7 @@ public class Robot extends IterativeRobot {
 
 	Joystick joystick = new Joystick(0); // 1 --> 0 JB
 
-	WPI_TalonSRX rCannon = new WPI_TalonSRX(5); // All of them were moved up one number	JB
+	/*WPI_TalonSRX rCannon = new WPI_TalonSRX(5);
 
 	WPI_TalonSRX lCannon = new WPI_TalonSRX(6);
 
@@ -96,6 +98,7 @@ public class Robot extends IterativeRobot {
 	WPI_TalonSRX rPull = new WPI_TalonSRX (9);
 
 	WPI_TalonSRX lPull = new WPI_TalonSRX(10);
+	*/
 
 	 
 
@@ -105,24 +108,21 @@ public class Robot extends IterativeRobot {
 
 	//Setting up 4 Motor drivetrain variables:	//	JB
 
-	WPI_TalonSRX m_frontLeft = new WPI_TalonSRX(0); //	JB
+	WPI_TalonSRX m_0 = new WPI_TalonSRX(0); //	port 12
 
-	WPI_TalonSRX m_rearLeft = new WPI_TalonSRX(15); //	JB
+	WPI_TalonSRX m_1 = new WPI_TalonSRX(1); //	port 0
 
-	SpeedControllerGroup m_Left = new SpeedControllerGroup(m_frontLeft, m_rearLeft); //	JB
-
-	
-
-	WPI_TalonSRX m_frontRight = new WPI_TalonSRX(12); //	JB
-
-	WPI_TalonSRX m_rearRight = new WPI_TalonSRX(3); //	JB
+//	SpeedControllerGroup m_Left = new SpeedControllerGroup(m_0, m_1); //	JB
 	
 	
+	WPI_TalonSRX m_2 = new WPI_TalonSRX(2); //	JB
 
-	SpeedControllerGroup m_Right = new SpeedControllerGroup(m_frontRight, m_rearRight); //	JB
+	WPI_TalonSRX m_3 = new WPI_TalonSRX(3); //	JB
+	
 
+//	SpeedControllerGroup m_Right = new SpeedControllerGroup(m_2, m_3); //	JB
 
-	DifferentialDrive NIgel = new DifferentialDrive(m_Left, m_Right); //	JB
+//	DifferentialDrive NIgel = new DifferentialDrive(m_Left, m_Right); //	JB
 
 
 	//Variables
@@ -285,15 +285,27 @@ public class Robot extends IterativeRobot {
 
 			double js_Right = joystick.getRawAxis(5); //	Right Joystick	JB
 
-		
+			if(joystick.getRawButton(1)){
+				m_0.set(1.0);
+			}
+			else {
+				m_0.set(0);
+			}
 
-			NIgel.tankDrive(js_Left, js_Right); //	Tank Drive	JB
+			
+			leftdrive(joystick.getRawAxis(1));
+			rightdrive(joystick.getRawAxis(5));
+			
+			
+			
+			
+//			NIgel.tankDrive(-js_Left, js_Right); //	Tank Drive	JB
 
 			Timer.delay(0.01); //	JB
 
 			
 
-			if(joystick.getRawButton(5)) { //if button pressed, the launch cube, need to change to rTrigger
+			/*if(joystick.getRawButton(5)) { //if button pressed, the launch cube, need to change to rTrigger
 
 			lCannon.set(-1);
 
@@ -338,8 +350,11 @@ public class Robot extends IterativeRobot {
 				rPull.set(0);
 
 				lPull.set(0);
+				
 
 			}
+			*/
+			
 
 		}
 
@@ -364,5 +379,16 @@ public class Robot extends IterativeRobot {
 	}
 
 	*/
+	
+	public void leftdrive(double d) {
+		m_0.set(-d);
+		m_1.set(-d);
+	}
+	
+	public void rightdrive(double d) {
+		m_2.set(-d);
+		m_3.set(-d);
+	}
 
 }
+
