@@ -21,6 +21,7 @@ package org.usfirst.frc.team6110.robot;
 
 
 import com.ctre.CANTalon; 
+import edu.wpi.first.wpilibj.CameraServer;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
@@ -84,6 +85,7 @@ public class Robot extends IterativeRobot {
 	 * we have to download the talonSRX library
 	 * -KL
 	 */
+	CameraServer server;
 
 	Joystick joystick = new Joystick(0); // 1 --> 0 JB
 	
@@ -136,7 +138,9 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putData("Auto choices", m_chooser); //	     JB
 
 		teleop = false; //	Autonomous will always begin first so this is set to false JB
-
+		
+		server = CameraServer.getInstance();
+		server.startAutomaticCapture();
 	}
 
 
@@ -282,9 +286,6 @@ public class Robot extends IterativeRobot {
 			rightdrive(js_Right);
 			
 			
-			
-			
-//			NIgel.tankDrive(-js_Left, js_Right); //	Tank Drive	JB
 
 			Timer.delay(0.01); //	JB
 
