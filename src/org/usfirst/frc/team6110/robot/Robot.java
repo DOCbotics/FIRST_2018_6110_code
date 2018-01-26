@@ -22,23 +22,22 @@ package org.usfirst.frc.team6110.robot;
 
 import com.ctre.CANTalon; 
 import edu.wpi.first.wpilibj.CameraServer;
+import edu.wpi.first.wpilibj.DriverStation;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
-
-//	JB
-
-//import edu.wpi.first.wpilibj.RobotDrive;	//	JB
 
 import edu.wpi.first.wpilibj.Talon;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.VictorSP;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;	//	JB
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
@@ -80,11 +79,6 @@ public class Robot extends IterativeRobot {
 	
 
 	//Declaring joysticks and motor controls
-	/**
-	 * I found out what's wrong with the program, turns out they removed all third party libraries
-	 * we have to download the talonSRX library
-	 * -KL
-	 */
 	CameraServer server;
 
 	Joystick joystick = new Joystick(0); // 1 --> 0 JB
@@ -99,9 +93,8 @@ public class Robot extends IterativeRobot {
 
 	WPI_TalonSRX m_3 = new WPI_TalonSRX(3); //	JB
 	
+	Spark m_4 = new Spark(1);
 	/*
-	WPI_TalonSRX m_4 = new WPI_TalonSRX(4);
-	
 	WPI_TalonSRX m_5 = new WPI_TalonSRX(5);
 	
 	WPI_TalonSRX m_6 = new WPI_TalonSRX(6);
@@ -114,8 +107,15 @@ public class Robot extends IterativeRobot {
 	*/
 	//Variables
 	
+	
 	double launch = 0.5;
-	boolean teleop; //	JB
+	double speed = 1;
+	double autospeed = 0.75;
+	boolean teleop;
+	boolean auto;
+	String side = "center";
+	String gamedata;
+
 
 	
 
@@ -131,13 +131,14 @@ public class Robot extends IterativeRobot {
 
 	public void robotInit() {
 
-		m_chooser.addDefault("Default Auto", kDefaultAuto); //	JB
+		m_chooser.addDefault("Default Auto", kDefaultAuto); 
 
-		m_chooser.addObject("My Auto", kCustomAuto); //	JB
+		m_chooser.addObject("My Auto", kCustomAuto); 
 
-		SmartDashboard.putData("Auto choices", m_chooser); //	     JB
+		SmartDashboard.putData("Auto choices", m_chooser);
 
-		teleop = false; //	Autonomous will always begin first so this is set to false JB
+		teleop = false; //	Autonomous will always begin first so this is set to false
+		auto = false;
 		
 		server = CameraServer.getInstance();
 		server.startAutomaticCapture();
@@ -175,6 +176,8 @@ public class Robot extends IterativeRobot {
 
 	public void autonomousInit() {
 
+		auto = true;
+		
 		m_autoSelected = m_chooser.getSelected();
 
 		// autoSelected = SmartDashboard.getString("Auto Selector",
@@ -182,7 +185,10 @@ public class Robot extends IterativeRobot {
 		// defaultAuto);
 
 		System.out.println("Auto selected: " + m_autoSelected);
-
+		
+		gamedata = DriverStation.getInstance().getGameSpecificMessage();
+		
+		//Timer.reset();
 	}
 
 
@@ -199,25 +205,18 @@ public class Robot extends IterativeRobot {
 	@Override
 
 	public void autonomousPeriodic() {
+		while(auto == true) {
+			
+			if(gamedata.charAt(0) == 'L' && side.equals("center")) {
+				m_0.set(autospeed);
+				m_1.set(autospeed);
+				m_2.set(autospeed);
+				m_3.set(autospeed);
+			}
 
-		switch (m_autoSelected) {
-
-			case kCustomAuto:
-
-				// Put custom auto code here
-
-				break;
-
-			case kDefaultAuto:
-
-			default:
-
-				// Put default auto code here
-
-				break;
-
-		}
-
+		} 
+		
+		
 	}
 
 
@@ -254,32 +253,12 @@ public class Robot extends IterativeRobot {
 
 		while(teleop == true /*isEnabled() && isOperatorControl()*/) { //while being used
 
-			//I greyed out isEnabled and isOperatorControl since
 
-			//we cannot simulate the server sending us these functions.
+			//Setting up Joy stick Axes for Tank Drive (much cleaner to set variables)
 
-			//That maybe the reason why the robot did not run at all LOL
+			double js_Left = joystick.getRawAxis(1); //	Left Joystick
 
-			
-
-			//NIgel.tankDrive(control.getRawAxis(2),control.getRawAxis(5)); //Drives NIgel using two analogs on xbox controller
-
-			//Timer.delay(0.001); //note: tankDrive is deprecated, this means it will still work but might not in the future
-
-			
-
-			//Setting up Joy stick Axes for Tank Drive (much cleaner to set variables)	JB
-
-			double js_Left = joystick.getRawAxis(1); //	Left Joystick	JB
-
-			double js_Right = joystick.getRawAxis(5); //	Right Joystick	JB
-
-			if(joystick.getRawButton(1)){
-				m_0.set(1.0);
-			}
-			else {
-				m_0.set(0);
-			}
+			double js_Right = joystick.getRawAxis(5); //	Right Joystick
 
 			
 			leftdrive(js_Left);
@@ -289,17 +268,29 @@ public class Robot extends IterativeRobot {
 
 			Timer.delay(0.01); //	JB
 
-			if(joystick.getRawAxis(3) > 0.75) {
-				//m_4.set(0.5);
+			if(joystick.getRawAxis(3) > 0.5) {
+				m_4.set(0.5);
 				//m_5.set(0.5);
 			}
 			else if(joystick.getRawAxis(2) > 0.75) {
+				//m_5.set(-0.5);
 				//m_6.set(-0.5);
-				//m_7.set(-0.5);
 			}
 			else if(joystick.getRawButton(6)) {
+				//m_7.set(launch);
 				//m_8.set(launch);
-				//m_9.set(launch);
+			}
+			else if(joystick.getRawButton(1)) {
+				speed = 1;
+			}
+			else if(joystick.getRawButton(2)) {
+				speed = 0.25;
+			}
+			else if(joystick.getRawButton(3)) {
+				speed = 0.5;
+			}
+			else if(joystick.getRawButton(4)) {
+				speed = 0.75;
 			}
 			else {
 				/*
@@ -339,16 +330,29 @@ public class Robot extends IterativeRobot {
 	*/
 	
 	public void leftdrive(double d) {
-	
-		m_0.set(-d);
-		m_1.set(-d);
+		if (d <= 0.2 && d >= -0.2) {
+		m_0.set(0);
+		m_1.set(0);
+		m_4.set(0);
+		}
+		else {
+		m_0.set(-d * speed);
+		m_1.set(-d * speed);
+		m_4.set(d * speed);
+		}
 		
 	}
 	
 	public void rightdrive(double d) {
-		m_2.set(-d);
-		m_3.set(-d);
-		
+		if (d <= 0.2 && d >= -0.2) {
+		m_2.set(0);
+		m_3.set(0);
+		}
+		else {
+		m_2.set(-d * speed);
+		m_3.set(-d * speed);
+		}
 	}
 
 }
+
