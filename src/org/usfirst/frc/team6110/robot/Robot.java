@@ -1,19 +1,12 @@
 /*----------------------------------------------------------------------------*/
-
 /* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                        */
-
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
-
 /* must be accompanied by the FIRST BSD license file in the root directory of */
-
 /* the project.                                                               */
-
 /*----------------------------------------------------------------------------*/
 
 /**
-
  * NIgel v0.1 (starting from scratch)
-
  **/
 
 package org.usfirst.frc.team6110.robot;
@@ -23,15 +16,19 @@ package org.usfirst.frc.team6110.robot;
 import com.ctre.CANTalon; 
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DriverStation;
-
+import edu.wpi.first.wpilibj.Timer;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-
+import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.IterativeRobot;
-
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PWMSpeedController;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
-
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.Talon;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -40,32 +37,29 @@ import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import com.kauailabs.navx.frc.AHRS;
+
+import edu.wpi.first.wpilibj.SerialPort;
 
 //http://first.wpi.edu/FRC/roborio/beta/docs/java/edu/wpi/first/wpilibj/drive/DifferentialDrive.html
 //^ Differential drive documentation
 
 
 /**
-
  * The VM is configured to automatically run this class, and to call the
-
  * functions corresponding to each mode, as described in the IterativeRobot
-
  * documentation. If you change the name of this class or the package after
-
  * creating this project, you must also update the build.properties file in the
-
  * project.
-
  */
 
 
 
 public class Robot extends IterativeRobot {
 
-	
+	AHRS accel; // the nav-x micro ahrs
 
 	private static final String kDefaultAuto = "Default";
 
@@ -93,13 +87,13 @@ public class Robot extends IterativeRobot {
 
 	WPI_TalonSRX m_3 = new WPI_TalonSRX(3); //	JB
 	
-	Spark m_4 = new Spark(1);
+	Spark m_4 = new Spark(4);
+	Spark m_5 = new Spark (5);
+	Spark m_6 = new Spark (6);
+	Spark m_7 = new Spark (7);
+	
+	
 	/*
-	WPI_TalonSRX m_5 = new WPI_TalonSRX(5);
-	
-	WPI_TalonSRX m_6 = new WPI_TalonSRX(6);
-	
-	WPI_TalonSRX m_7 = new WPI_TalonSRX(7);
 	
 	WPI_TalonSRX m_8 = new WPI_TalonSRX(8);
 	
@@ -113,18 +107,13 @@ public class Robot extends IterativeRobot {
 	double autospeed = 0.75;
 	boolean teleop;
 	boolean auto;
-	String side = "center";
+	String StartP = "center";
 	String gamedata;
 
 
-	
-
 	 /**
-
 	 * This function is run when the robot is first started up and should be
-
 	 * used for any initialization code.
-
 	 */
 
 	@Override
@@ -142,6 +131,15 @@ public class Robot extends IterativeRobot {
 		
 		server = CameraServer.getInstance();
 		server.startAutomaticCapture();
+		
+		try {
+			accel = new AHRS(SerialPort.Port.kUSB1, AHRS.SerialDataType.kProcessedData, (byte) 200);
+		}
+		
+		catch (RuntimeException ex){
+			DriverStation.reportError("NAVX MICRO Not found" + ex.getMessage(), true);
+		}
+		accel.reset();
 	}
 
 
@@ -149,23 +147,14 @@ public class Robot extends IterativeRobot {
 	/**
 
 	 * This autonomous (along with the chooser code above) shows how to select
-
 	 * between different autonomous modes using the dashboard. The sendable
-
 	 * chooser code works with the Java SmartDashboard. If you prefer the
-
 	 * LabVIEW Dashboard, remove all of the chooser code and uncomment the
-
 	 * getString line to get the auto name from the text box below the Gyro
-
 	 *
-
 	 * <p>You can add additional auto modes by adding additional comparisons to
-
 	 * the switch structure below with additional strings. If using the
-
 	 * SendableChooser make sure to add them to the chooser code above as well.
-
 	 */
 
 	
@@ -195,9 +184,7 @@ public class Robot extends IterativeRobot {
 	
 
 	/**
-
 	 * This function is called periodically during autonomous.
-
 	 */
 
 	
@@ -206,14 +193,10 @@ public class Robot extends IterativeRobot {
 
 	public void autonomousPeriodic() {
 		while(auto == true) {
+			SmartDashboard.putString("DB/Sting 1", String.valueOf(accel.getYaw()));
+			char side = gamedata.charAt(0);
 			
-			if(gamedata.charAt(0) == 'L' && side.equals("center")) {
-				m_0.set(autospeed);
-				m_1.set(autospeed);
-				m_2.set(autospeed);
-				m_3.set(autospeed);
-			}
-
+			
 		} 
 		
 		
@@ -221,18 +204,13 @@ public class Robot extends IterativeRobot {
 
 
 
-	
-
 	//The teleopInit method is called once each time the robot enters teleop mode
 
 	@Override
 
 	public void teleopInit() {
-
 		
-
 		//Check if this function is called so that the next function will be enabled
-
 		teleop = true;
 
 	}
@@ -240,19 +218,22 @@ public class Robot extends IterativeRobot {
 	
 
 	/**
-
 	 * This function is called periodically during operator control.
-
 	 */
 
-	
+	public void fireSpark(double value) {
+		m_4.set(value);
+		m_5.set(value);
+		m_6.set(value);
+		m_7.set(value);
+	}
 
 	@Override
 
 	public void teleopPeriodic() {
 
-		while(teleop == true /*isEnabled() && isOperatorControl()*/) { //while being used
-
+		//while(teleop == true /*isEnabled() && isOperatorControl()*/) { //while being used
+			RefreshDashboard();
 
 			//Setting up Joy stick Axes for Tank Drive (much cleaner to set variables)
 
@@ -264,21 +245,21 @@ public class Robot extends IterativeRobot {
 			leftdrive(js_Left);
 			rightdrive(js_Right);
 			
-			
 
 			Timer.delay(0.01); //	JB
 
-			if(joystick.getRawAxis(3) > 0.5) {
-				m_4.set(0.5);
-				//m_5.set(0.5);
+			double rTrigger = joystick.getRawAxis(3);
+			double lTrigger = joystick.getRawAxis(2);
+			
+			if( rTrigger > 0.5) {
+				//victor.set(rTrigger);
+				
 			}
-			else if(joystick.getRawAxis(2) > 0.75) {
-				//m_5.set(-0.5);
-				//m_6.set(-0.5);
+			else if(lTrigger > 0.5) {
+				//victor.set(rTrigger);
 			}
 			else if(joystick.getRawButton(6)) {
-				//m_7.set(launch);
-				//m_8.set(launch);
+				fireSpark(launch);
 			}
 			else if(joystick.getRawButton(1)) {
 				speed = 1;
@@ -293,6 +274,7 @@ public class Robot extends IterativeRobot {
 				speed = 0.75;
 			}
 			else {
+				fireSpark(0);
 				/*
 				 * m_4.set(0);
 				 * m_5.set(0);
@@ -307,19 +289,18 @@ public class Robot extends IterativeRobot {
 
 		}
 
-	}
-
 
 
 	/**
-
 	 * This function is called periodically during test mode.
-
 	 */
 
+	public void RefreshDashboard() {
+		SmartDashboard.putString("DB/String 0", String.valueOf(accel.getYaw()));
+	}
 	
 
-	/*
+	
 
 	@Override
 
@@ -327,18 +308,16 @@ public class Robot extends IterativeRobot {
 
 	}
 
-	*/
+	
 	
 	public void leftdrive(double d) {
 		if (d <= 0.2 && d >= -0.2) {
 		m_0.set(0);
 		m_1.set(0);
-		m_4.set(0);
 		}
 		else {
 		m_0.set(-d * speed);
 		m_1.set(-d * speed);
-		m_4.set(d * speed);
 		}
 		
 	}
@@ -355,4 +334,3 @@ public class Robot extends IterativeRobot {
 	}
 
 }
-
