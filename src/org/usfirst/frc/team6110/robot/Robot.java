@@ -92,6 +92,7 @@ public class Robot extends IterativeRobot {
 	Spark m_6 = new Spark (6);
 	Spark m_7 = new Spark (7);
 	
+	Timer timer = new Timer();
 	
 	/*
 	
@@ -104,11 +105,15 @@ public class Robot extends IterativeRobot {
 	
 	double launch = 0.5;
 	double speed = 1;
-	double autospeed = 0.75;
+	double autospeed = -0.75; //starting NIgel backwards
 	boolean teleop;
 	boolean auto;
+	boolean timerReset = false;
 	String StartP = "center";
 	String gamedata;
+	
+	float rotate = accel.getYaw();
+	
 
 
 	 /**
@@ -164,7 +169,7 @@ public class Robot extends IterativeRobot {
 	@Override
 
 	public void autonomousInit() {
-
+		timerReset = false;
 		auto = true;
 		
 		m_autoSelected = m_chooser.getSelected();
@@ -176,8 +181,7 @@ public class Robot extends IterativeRobot {
 		System.out.println("Auto selected: " + m_autoSelected);
 		
 		gamedata = DriverStation.getInstance().getGameSpecificMessage();
-		
-		//Timer.reset();
+		timer.start();		
 	}
 
 
@@ -192,10 +196,38 @@ public class Robot extends IterativeRobot {
 	@Override
 
 	public void autonomousPeriodic() {
-		while(auto == true) {
-			SmartDashboard.putString("DB/Sting 1", String.valueOf(accel.getYaw()));
-			char side = gamedata.charAt(0);
+		while(auto == true   && timer.get() < 15) 
+		{	
+			if(timerReset == false) 
+			{
+				timer.reset();
+				timerReset = true;
+			}
 			
+			SmartDashboard.putString("DB/Sting 1", String.valueOf(accel.getYaw()));
+			
+			rotate = accel.getYaw();
+			
+			char side = gamedata.charAt(0);		
+			
+			if(side == 'L' && StartP.equals("center")) {
+				
+			}
+			else if(side == 'L' && StartP.equals("right")) {
+				
+			}
+			else if(side == 'L' && StartP.equals("left")) {
+	
+			}
+			else if(side == 'R' && StartP.equals("center")) {
+				
+			}
+			else if(side == 'R' && StartP.equals("right")) {
+				
+			}
+			else if(side == 'R' && StartP.equals("left")) {
+				
+			}
 			
 		} 
 		
@@ -226,6 +258,7 @@ public class Robot extends IterativeRobot {
 		m_5.set(value);
 		m_6.set(value);
 		m_7.set(value);
+	//Ore wa o chin chin ga daisuki nanda yo onii chan
 	}
 
 	@Override
