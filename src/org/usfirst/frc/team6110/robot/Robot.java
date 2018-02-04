@@ -75,43 +75,41 @@ public class Robot extends IterativeRobot {
 	//Declaring joysticks and motor controls
 	CameraServer server;
 
-	Joystick joystick = new Joystick(0); // 1 --> 0 JB
+	Joystick joystick = new Joystick(0); // declaring xbox controller
 	
 
-	//Setting up 4 Motor drivetrain variables:	//	JB
+	//Setting up 4 Motor drivetrain variables
 	VictorSP m_0 = new VictorSP(0);
-
-	WPI_TalonSRX m_1 = new WPI_TalonSRX(1); //	port 0
+	WPI_TalonSRX m_1 = new WPI_TalonSRX(1);
+	WPI_TalonSRX m_2 = new WPI_TalonSRX(2);
+	WPI_TalonSRX m_3 = new WPI_TalonSRX(3);
 	
-	WPI_TalonSRX m_2 = new WPI_TalonSRX(2); //	JB
-
-	WPI_TalonSRX m_3 = new WPI_TalonSRX(3); //	JB
-	
+	//declaring cannon motors
 	Spark m_4 = new Spark(4);
 	Spark m_5 = new Spark (5);
 	Spark m_6 = new Spark (6);
 	Spark m_7 = new Spark (7);
 	
+	//declaring arm motors
+	VictorSP m_8 = new VictorSP(8);
+	VictorSP m_9 = new VictorSP(9);
+	
+	//declaring timer for auto
 	Timer timer = new Timer();
+
 	
-	/*
-	
-	WPI_TalonSRX m_8 = new WPI_TalonSRX(8);
-	
-	WPI_TalonSRX m_9 = new WPI_TalonSRX(9);
-	*/
 	//Variables
-	
-	
-	double launch = 0.5;
+	double launch = 0.5; //cannon stength
 	double speed = 1;
-	double autospeed = -0.75; //starting NIgel backwards
+	double autospeed = -0.75; //starting NIgel backwards in auto
 	boolean teleop;
 	boolean auto;
 	boolean timerReset = false;
-	String StartP = "center";
+	String StartP = "center"; //starting position of NIgel, will need to be adjusted before games
+	//FMS String
 	String gamedata;
 	
+	//yaw axis for navx
 	float rotate = accel.getYaw();
 	
 
@@ -133,10 +131,11 @@ public class Robot extends IterativeRobot {
 
 		teleop = false; //	Autonomous will always begin first so this is set to false
 		auto = false;
-		
+		//setting up camera
 		server = CameraServer.getInstance();
 		server.startAutomaticCapture();
 		
+		//finding our navx
 		try {
 			accel = new AHRS(SerialPort.Port.kUSB1, AHRS.SerialDataType.kProcessedData, (byte) 200);
 		}
@@ -180,7 +179,9 @@ public class Robot extends IterativeRobot {
 
 		System.out.println("Auto selected: " + m_autoSelected);
 		
+		//receiving FMS message
 		gamedata = DriverStation.getInstance().getGameSpecificMessage();
+		//starting timer for auto
 		timer.start();		
 	}
 
@@ -253,43 +254,43 @@ public class Robot extends IterativeRobot {
 	 * This function is called periodically during operator control.
 	 */
 
+	//putting sparks in a method as they all will be going at the same time w/ same value
 	public void fireSpark(double value) {
 		m_4.set(value);
 		m_5.set(value);
 		m_6.set(value);
 		m_7.set(value);
-	//Ore wa o chin chin ga daisuki nanda yo onii chan
 	}
 
 	@Override
 
 	public void teleopPeriodic() {
-
-		//while(teleop == true /*isEnabled() && isOperatorControl()*/) { //while being used
+			//refreshing the yaw value of navx
 			RefreshDashboard();
 
 			//Setting up Joy stick Axes for Tank Drive (much cleaner to set variables)
-
 			double js_Left = joystick.getRawAxis(1); //	Left Joystick
 
 			double js_Right = joystick.getRawAxis(5); //	Right Joystick
 
-			
+			//driving with the values of the joysticks
 			leftdrive(js_Left);
 			rightdrive(js_Right);
 			
 
-			Timer.delay(0.01); //	JB
-
+			Timer.delay(0.01);
+			
 			double rTrigger = joystick.getRawAxis(3);
 			double lTrigger = joystick.getRawAxis(2);
 			
 			if( rTrigger > 0.5) {
-				//victor.set(rTrigger);
+				m_8.set(rTrigger);
+				m_9.set(rTrigger);
 				
 			}
 			else if(lTrigger > 0.5) {
-				//victor.set(rTrigger);
+				m_8.set(-lTrigger);
+				m_9.set(-lTrigger);
 			}
 			else if(joystick.getRawButton(6)) {
 				fireSpark(launch);
@@ -307,16 +308,10 @@ public class Robot extends IterativeRobot {
 				speed = 0.75;
 			}
 			else {
+				//all motors must be put in else statement as 0 so that they dont move when called
 				fireSpark(0);
-				/*
-				 * m_4.set(0);
-				 * m_5.set(0);
-				 * m_6.set(0);
-				 * m_7.set(0);
-				 * m_8.set(0);
-				 * m_9.set(0);
-				 * 
-				 */
+				m_8.set(0);
+				m_9.set(0);
 			}
 			
 
@@ -329,7 +324,8 @@ public class Robot extends IterativeRobot {
 	 */
 
 	public void RefreshDashboard() {
-		SmartDashboard.putString("DB/String 0", String.valueOf(accel.getYaw()));
+		SmartDashboard.putString("DB/String 0", "YAW:");
+		SmartDashboard.putString("DB/String 5", String.valueOf(accel.getYaw()));
 	}
 	
 
